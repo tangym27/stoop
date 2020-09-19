@@ -8,6 +8,7 @@ app = Flask(__name__)
 
 # must run python3 -m pip install 'pymongo[srv]'
 # documentation: https://pymongo.readthedocs.io/en/stable/tutorial.html
+app.config['SECRET_KEY'] = "KIUYGY(H't76$A%U$6"
 client = MongoClient("mongodb+srv://admin:ibqamgEqZgrWoEJP@cluster0.j7aiy.mongodb.net/stoop?retryWrites=true&w=majority")
 db = client.stoop
 users = db.users
@@ -19,8 +20,11 @@ def home():
     return "Hello World"
 
 @app.route('/login', methods=['POST', 'GET'])
-def home():
-    return "Hello World" 
+def login():
+    if session.get("email"):
+        return "Send to home page"
+    # to do: get email + password from post args and pass them to database 
+    return "Login page"
 
 if __name__ == "__main__":
     # print(users.find_one({"id": 0}))
