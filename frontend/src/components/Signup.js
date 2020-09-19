@@ -4,7 +4,7 @@ import styled from "styled-components";
 
 const Component = styled.div``;
 
-const Signup = () => {
+const Signup = (props) => {
   const [email, setEmail] = useState(null);
   const [password, setPassword] = useState(null);
   const [confirmpassword, setConfirmPassword] = useState(null);
@@ -30,7 +30,7 @@ const Signup = () => {
         lastName,
       })
       .then((response) => {
-        console.log(response);
+        props.addUser(response.data);
       })
       .catch((error) => {
         console.log(error);

@@ -4,7 +4,7 @@ import styled from "styled-components";
 
 const Component = styled.div``;
 
-const Login = () => {
+const Login = (props) => {
   const [email, setEmail] = useState(null);
   const [password, setPassword] = useState(null);
   const [error, setError] = useState("");
@@ -23,7 +23,7 @@ const Login = () => {
         password,
       })
       .then((response) => {
-        console.log(response);
+        console.log(response.data);
       })
       .catch((error) => {
         console.log(error);
