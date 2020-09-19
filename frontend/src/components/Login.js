@@ -16,7 +16,7 @@ const Login = () => {
       setError("Please fill out all fields");
     }
     setError("");
-    console.log(email, password);
+    console.log({ email, password });
     axios
       .post("/login", {
         email,
