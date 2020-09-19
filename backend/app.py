@@ -17,6 +17,8 @@ requests = db.requests
 
 @app.route('/', methods=['POST', 'GET'])
 def home():
+    if not session.get("email"):
+        return "Send to login page"
     return "Hello World"
 
 @app.route('/login', methods=['POST', 'GET'])
