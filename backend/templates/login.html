@@ -1,7 +1,8 @@
 {% extends "layout.html" %} {% block content %}
+<div class="container p-3 my-3 bg-dark text-white text-center">
 
-<form name="login" action="" method="POST" novalidate class="form">
-  <fieldset>
+<form name="login" action="" method="POST" novalidate class="form row was-validated">
+  <fieldset class="container">
     <legend>Login</legend>
     {{ loginForm.hidden_tag() }}
     <p>
@@ -18,9 +19,10 @@
     </p>
 
     <p>{{ loginForm.submit() }}</p>
+
   </fieldset>
 </form>
-
-Don't have an account? <a href="{{url_for('register')}}">Register</a>
+Don't have an account? <a href="{{url_for('signup')}}">Register</a>
+</div>
 
 {% endblock %}

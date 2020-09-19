@@ -1,4 +1,5 @@
 {% extends "layout.html" %} {% block content %}
+<div class="container p-3 my-3 bg-dark text-white text-center">
 <form name="login" action="" method="POST" novalidate class="form">
   <fieldset>
     <legend>Signup</legend>
@@ -42,6 +43,8 @@
     <p>{{ signupForm.submit() }}</p>
   </fieldset>
 </form>
-
 Already have an account? <a href="{{url_for('login')}}">Login</a>
+</div>
+
+
 {% endblock %}

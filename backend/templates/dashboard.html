@@ -1,0 +1,19 @@
+{% extends "layout.html" %} {% block content %}
+
+{% for request in requests["requests"] %}
+<div class="card">
+    <div class="card-body">
+        <p class="card-text">{{request["category"]}}</p>
+        <p class="card-text">Date Requested: {{request["dateRequested"]}}</p>
+        <h5 class="card-title">{{request["task"]}}</h5>
+        <p class="card-text">{{request["description"]}}</p>
+        <form method="POST" action="/claim">
+            <input hidden value=`{{request["_id"]}}` name="requestID" id="requestID" />
+            <input type="submit" value="Claim" />
+        </form>
+    </div>
+</div>
+{% endfor %}
+
+
+{% endblock %}

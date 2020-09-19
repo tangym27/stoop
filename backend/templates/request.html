@@ -1,0 +1,42 @@
+{% extends "layout.html" %} {% block content %}
+
+<form name="request" action="" method="POST" novalidate class="form">
+  <fieldset>
+    <legend>Requests</legend>
+    {{ requestForm.hidden_tag() }}
+    <p>
+      {{ requestForm.category.label }}<br />
+      {% for error in requestForm.category.errors %}
+      <span class="errorMessage">{{ error }}</span>
+      {% endfor %}
+      {% for subfield in requestForm.category %}
+        <tr>
+            <td>{{ subfield }}</td>
+            <td>{{ subfield.label }}</td>
+        </tr>
+        {% endfor %}
+    </p>
+    <p>
+        {{ requestForm.task.label }}<br />
+        {{ requestForm.task() }} {% for error in requestForm.task.errors %}
+        <span class="errorMessage">{{ error }}</span>
+        {% endfor %}
+    </p>
+    <p>
+      {{ requestForm.address.label }}<br />
+      {{ requestForm.address() }} {% for error in requestForm.address.errors %}
+      <span class="errorMessage">{{ error }}</span>
+      {% endfor %}
+    </p>
+    <p>
+        {{ requestForm.description.label }}<br />
+        {{ requestForm.description() }} {% for error in requestForm.description.errors %}
+        <span class="errorMessage">{{ error }}</span>
+        {% endfor %}
+    </p>
+
+    <p>{{ requestForm.submit() }}</p>
+  </fieldset>
+</form>
+
+{% endblock %}
