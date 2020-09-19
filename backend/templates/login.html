@@ -1,28 +1,35 @@
 {% extends "layout.html" %} {% block content %}
+
 <div class="container p-3 my-3 bg-dark text-white text-center">
+  <form
+    name="login"
+    action=""
+    method="POST"
+    novalidate
+    class="form row was-validated"
+  >
+    <fieldset class="container">
+      <legend>Login</legend>
+      {{ loginForm.hidden_tag() }}
+      <p>
+        {{ loginForm.email.label }}<br />
+        {{ loginForm.email() }} <br />
+        {% for error in loginForm.email.errors %}
+        <div class="alert alert-danger btn-sm" role="alert">{{ error }}</div>
+        {% endfor %}
+      </p>
+      <p>
+        {{ loginForm.password.label }}<br />
+        {{ loginForm.password() }} <br />
+        {% for error in loginForm.password.errors %}
+        <span class="alert alert-danger btn-sm" role="alert">{{ error }}</span>
+        {% endfor %}
+      </p>
 
-<form name="login" action="" method="POST" novalidate class="form row was-validated">
-  <fieldset class="container">
-    <legend>Login</legend>
-    {{ loginForm.hidden_tag() }}
-    <p>
-      {{ loginForm.email.label }}<br />
-      {{ loginForm.email() }} {% for error in loginForm.email.errors %}
-      <span class="errorMessage">{{ error }}</span>
-      {% endfor %}
-    </p>
-    <p>
-      {{ loginForm.password.label }}<br />
-      {{ loginForm.password() }} {% for error in loginForm.password.errors %}
-      <span class="errorMessage">{{ error }}</span>
-      {% endfor %}
-    </p>
-
-    <p>{{ loginForm.submit() }}</p>
-
-  </fieldset>
-</form>
-Don't have an account? <a href="{{url_for('signup')}}">Register</a>
+      <p>{{ loginForm.submit() }}</p>
+    </fieldset>
+  </form>
+  Don't have an account? <a href="{{url_for('signup')}}">Register</a>
 </div>
 
 {% endblock %}

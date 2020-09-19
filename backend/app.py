@@ -6,6 +6,7 @@ from flask import Flask, render_template, flash, request, session, redirect, url
 from datetime import datetime
 import json
 from bson import json_util
+from bson.objectid import ObjectId
 
 app = Flask(__name__)
 
@@ -67,38 +68,50 @@ def home():
     return redirect(url_for("dashboard"))
 
 # see recent orders
-@app.route("/dashboard")
+@app.route('/dashboard')
 def dashboard():
-    # seeing your own orders
-    # { user: session.get("user").get("id") }
-    # seeing orders you accepted
-    # { volunteer: session.get("user").get("id") }
     if not session.get("user"):
         return redirect(url_for("login"))
     
+    # myRequests
+    # myClaimedRequests
+    # all
+    myRequests = []
+    myClaimedRequests = []
     allRequests = []
-    for request in requests.find({}):
+    
+    for request in requests.find({}).sort("dateRequested",pymongo.DESCENDING):
         _id = str(request.get("_id"))
+        user = str(request.get("user"))
         task = request.get("task")
         category = request.get("category")
         description = request.get("description")
         dateRequested = request.get("dateRequested")
         finished = request.get("finished")
         volunteer = request.get("volunteer")
-        print(volunteer)
-        
-        requestObj = {
-            "_id": _id,
-            "task": task,
-            "category": category,
-            "description": description,
-            "dateRequested": str(dateRequested).split(" ")[0],
-            "finished": finished
-        }
-        allRequests.append(requestObj)
-    
-    return render_template("dashboard.html", requests={"requests": allRequests})
 
+        requestObj = {
+                "_id": _id,
+                "task": task,
+                "category": category,
+                "description": description,
+                "dateRequested": str(dateRequested).split(" ")[0],
+                "finished": finished,
+                "volunteer": volunteer,
+                "user": user
+            }
+
+        if user == session.get("user").get("id"):
+            myRequests.append(requestObj)
+        elif volunteer == session.get("user").get("id"):
+            myClaimedRequests.append(requestObj)
+        # elif not volunteer or volunteer == session.get("user").get("id") or user == session.get("user").get("id"):
+        if not volunteer:
+            allRequests.append(requestObj)
+
+    return render_template("dashboard.html", requests={"requests": allRequests}, myRequests={"requests": myRequests}, myClaimedRequests=myClaimedRequests)
+
+import bson 
 @app.route("/claim", methods=["POST"])
 def claim():
     if not session.get("user"):
@@ -106,22 +119,23 @@ def claim():
 
     requestID = request.form.get("requestID")
     userID = session.get("user").get("id")
+    requestID = requestID[1:-1]
+    requests.update_one({ "_id": ObjectId(requestID)}, { "$set": { "volunteer": userID } })
 
-    requests.update_one({ "_id": requestID}, { "$set": { "volunteer": userID } })
     flash("You have successfully claimed this task", "success")
     return redirect(url_for("dashboard"))
 
-# @app.route("/complete", methods=["POST"])
-# def complete():
-#     if not session.get("user"):
-#         return redirect(url_for("login"))
+@app.route("/complete", methods=["POST"])
+def complete():
+    if not session.get("user"):
+        return redirect(url_for("login"))
 
-#     requestID = request.form.get("requestID")
-#     userID = session.get("user").get("id")
+    requestID = request.form.get("requestID")
+    requestID = requestID[1:-1]
+    requests.update_one({ "_id": ObjectId(requestID)}, { "$set": { "finished": True } })
 
-#     requests.update_one({ "_id": requestID}, { "$set": { "finished": True } })
-#     flash("You have successfully completed this task", "success")
-#     return redirect(url_for("dashboard"))
+    flash("You have successfully completed this task", "success")
+    return redirect(url_for("dashboard"))
 
 # submitting a request
 @app.route('/requestOne', methods=['POST', 'GET'])
@@ -170,8 +184,9 @@ def signup():
         new_user = {"email": email, "password": password,
                     "first_name": first_name, "last_name": last_name}
         new_user_id = str(users.insert_one(new_user))
-        session["user"] = {"email": email, "first_name": first_name, "last_name": last_name, "id": new_user_id}
-        flash("You have successfully signed up and logged in", "success")
+        return redirect(url_for("login"))
+        # session["user"] = {"email": email, "first_name": first_name, "last_name": last_name, "id": new_user_id}
+        flash("You have successfully signed up", "success")
     return render_template("signup.html", signupForm=signupForm)
 
 
@@ -189,7 +204,9 @@ def login():
         user = users.find_one({"email": email})
 
         if user and password == user.get('password'):
-            session["user"] = {"email": email, "first_name": user.get("first_name"), "last_name": user.get("last_name"),"id": user.get("_id")}
+            
+            session["user"] = {"email": email, "first_name": user.get("first_name"), "last_name": user.get("last_name"),"id": str(user.get("_id"))}
+            
             flash("You have successfully logged in", "success")
             return redirect(url_for("dashboard"))
     

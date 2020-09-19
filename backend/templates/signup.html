@@ -1,50 +1,52 @@
 {% extends "layout.html" %} {% block content %}
 <div class="container p-3 my-3 bg-dark text-white text-center">
-<form name="login" action="" method="POST" novalidate class="form">
-  <fieldset>
-    <legend>Signup</legend>
-    {{ signupForm.hidden_tag() }}
-    <p>
-      {{ signupForm.email.label }}<br />
-      {{ signupForm.email() }} {% for error in signupForm.email.errors %}
-      <span class="errorMessage">{{ error }}</span>
-      {% endfor %}
-    </p>
-    <p>
-      {{ signupForm.password.label }}<br />
-      {{ signupForm.password() }} {% for error in signupForm.password.errors %}
-      <span class="errorMessage">{{ error }}</span>
-      {% endfor %}
-    </p>
+  <form name="login" action="" method="POST" novalidate class="form">
+    <fieldset>
+      <legend>Signup</legend>
+      {{ signupForm.hidden_tag() }}
+      <p>
+        {{ signupForm.email.label }}<br />
+        {{ signupForm.email() }}<br />
+        {% for error in signupForm.email.errors %}
+        <span class="alert alert-danger btn-sm" role="alert">{{ error }}</span>
+        {% endfor %}
+      </p>
+      <p>
+        {{ signupForm.password.label }}<br />
+        {{ signupForm.password() }}<br />
+        {% for error in signupForm.password.errors %}
+        <span class="alert alert-danger btn-sm" role="alert">{{ error }}</span>
+        {% endfor %}
+      </p>
 
-    <p>
-      {{ signupForm.passwordConfirm.label }}<br />
-      {{ signupForm.passwordConfirm() }} {% for error in
-      signupForm.passwordConfirm.errors %}
-      <span class="errorMessage">{{ error }}</span>
-      {% endfor %}
-    </p>
+      <p>
+        {{ signupForm.passwordConfirm.label }}<br />
+        {{ signupForm.passwordConfirm() }} <br />
+        {% for error in signupForm.passwordConfirm.errors %}
+        <span class="alert alert-danger btn-sm" role="alert">{{ error }}</span>
+        {% endfor %}
+      </p>
 
-    <p>
-      {{ signupForm.firstName.label }}<br />
-      {{ signupForm.firstName() }} {% for error in signupForm.firstName.errors
-      %}
-      <span class="errorMessage">{{ error }}</span>
-      {% endfor %}
-    </p>
+      <p>
+        {{ signupForm.firstName.label }}<br />
+        {{ signupForm.firstName() }} <br />
+        {% for error in signupForm.firstName.errors %}
+        <span class="alert alert-danger btn-sm" role="alert">{{ error }}</span>
+        {% endfor %}
+      </p>
 
-    <p>
-      {{ signupForm.lastName.label }}<br />
-      {{ signupForm.lastName() }} {% for error in signupForm.lastName.errors %}
-      <span class="errorMessage">{{ error }}</span>
-      {% endfor %}
-    </p>
+      <p>
+        {{ signupForm.lastName.label }}<br />
+        {{ signupForm.lastName() }} <br />
+        {% for error in signupForm.lastName.errors %}
+        <span class="alert alert-danger btn-sm" role="alert">{{ error }}</span>
+        {% endfor %}
+      </p>
 
-    <p>{{ signupForm.submit() }}</p>
-  </fieldset>
-</form>
-Already have an account? <a href="{{url_for('login')}}">Login</a>
+      <p>{{ signupForm.submit() }}</p>
+    </fieldset>
+  </form>
+  Already have an account? <a href="{{url_for('login')}}">Login</a>
 </div>
-
 
 {% endblock %}

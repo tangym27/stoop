@@ -1,19 +1,39 @@
 {% extends "layout.html" %} {% block content %}
+<button type="button" onclick=`{%" set display="allRequests" %}`>
+  All Requests
+</button>
+<!-- <button type="button" onclick="">My Requests</button>
+<button type="button" onclick="">My Claimed Requests</button> -->
+{% set display = 'allRequests' %}
 
-{% for request in requests["requests"] %}
-<div class="card">
-    <div class="card-body">
+<div class="card-container w-100">
+  <div class="d-flex">
+    {% for request in requests["requests"] %}
+    <div class="card">
+      <div class="card-body">
         <p class="card-text">{{request["category"]}}</p>
         <p class="card-text">Date Requested: {{request["dateRequested"]}}</p>
         <h5 class="card-title">{{request["task"]}}</h5>
         <p class="card-text">{{request["description"]}}</p>
-        <form method="POST" action="/claim">
-            <input hidden value=`{{request["_id"]}}` name="requestID" id="requestID" />
-            <input type="submit" value="Claim" />
+        {% if session.get("user").get("id") == request["volunteer"] %}
+        <p>Claimed by you!</p>
+
+        {% elif session.get("user").get("id") == request["user"] %}
+        <form method="POST" action="/complete">
+          <input hidden value=`{{request["_id"]}}` name="requestID"
+          id="requestID" />
+          <input type="submit" value="Mark as complete" />
         </form>
+        {% else %}
+        <form method="POST" action="/claim">
+          <input hidden value=`{{request["_id"]}}` name="requestID"
+          id="requestID" />
+          <input type="submit" value="Claim" />
+        </form>
+        {% endif %}
+      </div>
     </div>
+    {% endfor %}
+  </div>
 </div>
-{% endfor %}
-
-
 {% endblock %}
