@@ -21,20 +21,42 @@ requests = db.requests
 @app.route('/', methods=['POST', 'GET'])
 def home():
     if not session.get("email"):
-        return "Send to login page"
+        return redirect(url_for('login'))
+    # this is the send orders page
     return "Hello World"
+
+
+@app.route('/signup', methods=['POST', 'GET'])
+def signup():
+    if session.get("email"):
+        return "Send to home page"
+    email = request.json['email']
+    password = request.json['password']
+    first_name = request.json['firstName']
+    last_name = request.json['lastName']
+
+    # check if user in database already
+    if users.find_one({"email": email}):
+        return  # return that user already exists
+
+    new_user = {"email": email, "password": password,
+                "first_name": first_name, "last_name": last_name}
+    new_user_id = users.insert_one(new_user)
+    return redirect(url_for('login'))
 
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     if session.get("email"):
         return "Send to home page"
-    # to do: get email + password from post args and pass them to database
     email = request.json['email']
     password = request.json['password']
-    print(email)
-    print(password)
-    return "Login page"
+
+    # check if user in database
+    user = users.find_one({"email": email})
+    if password == user.password:
+        return redirect(url_for('home'))
+    return redirect(url_for('login'))
 
 
 if __name__ == "__main__":

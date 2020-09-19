@@ -16,7 +16,7 @@ const Login = () => {
       setError("Please fill out all fields");
     }
     setError("");
-    console.log({ email, password });
+
     axios
       .post("/login", {
         email,
@@ -39,6 +39,7 @@ const Login = () => {
           name="email"
           placeholder="Email"
           onChange={(e) => setEmail(e.target.value)}
+          required
         />
       </Component>
       <Component>
@@ -47,6 +48,7 @@ const Login = () => {
           name="password"
           placeholder="Password"
           onChange={(e) => setPassword(e.target.value)}
+          required
         />
       </Component>
       <input type="submit" value="Submit" />
