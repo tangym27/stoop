@@ -26,6 +26,9 @@ def login():
     if session.get("email"):
         return "Send to home page"
     # to do: get email + password from post args and pass them to database 
+    print(request.args)
+    email = request.form.get('email')
+    password = request.form.get('password')
     return "Login page"
 
 if __name__ == "__main__":

@@ -1,4 +1,5 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
+import axios from "axios";
 import styled from "styled-components";
 
 const Component = styled.div``;
@@ -10,18 +11,44 @@ const Login = () => {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (!email || !password){ // use regex to make sure password and email are correct format
+    if (!email || !password) {
+      // use regex to make sure password and email are correct format
       setError("Please fill out all fields");
-    } 
+    }
     setError("");
-    // so axios stuff 
+    console.log(email, password);
+    axios
+      .post("/login", {
+        email,
+        password,
+      })
+      .then((response) => {
+        console.log(response);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
   return (
-    <form onSubmit={(e) => handleLogin(e)}> 
-      <h1>Login</h1> 
-      <div style={{color:"red"}}>{error}</div>
-      <Component><input type="text" name="email" placeholder="Email"/></Component>
-      <Component><input type="password" name="password" placeholder="Password" /></Component>
+    <form onSubmit={(e) => handleLogin(e)}>
+      <h1>Login</h1>
+      <div style={{ color: "red" }}>{error}</div>
+      <Component>
+        <input
+          type="text"
+          name="email"
+          placeholder="Email"
+          onChange={(e) => setEmail(e.target.value)}
+        />
+      </Component>
+      <Component>
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          onChange={(e) => setPassword(e.target.value)}
+        />
+      </Component>
       <input type="submit" value="Submit" />
     </form>
   );
