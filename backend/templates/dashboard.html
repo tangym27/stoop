@@ -1,6 +1,12 @@
 {% extends "layout.html" %} {% block content %}
-<button type="button" onclick=`{%" set display="allRequests" %}`>
+<button type="button" onclick=`{% set display="allRequests" %}`>
   All Requests
+</button>
+<button type="button" onclick=`{% set display="myRequests" %}`>
+  My Requests
+</button>
+<button type="button" onclick=`{% set display="claimedRequests" %}`>
+  My Claimed Requests
 </button>
 <!-- <button type="button" onclick="">My Requests</button>
 <button type="button" onclick="">My Claimed Requests</button> -->
