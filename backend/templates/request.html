@@ -1,8 +1,8 @@
 {% extends "layout.html" %} {% block content %}
-
+<div class="requestForm">
 <form name="request" action="" method="POST" novalidate class="form">
   <fieldset>
-    <legend>Requests</legend>
+    <legend>New Request</legend>
     {{ requestForm.hidden_tag() }}
     <p>
       {{ requestForm.category.label }}<br />
@@ -39,5 +39,6 @@
     <p>{{ requestForm.submit() }}</p>
   </fieldset>
 </form>
+<div>
 
 {% endblock %}

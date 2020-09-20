@@ -14,7 +14,11 @@
 <!-- {% set display = 'allRequests' %} -->
 <div class="dashboard">
   <p></p>
+
+  <div class="requestField">
   <form action="/dashboard">
+
+    <legend> Choose a request! </legend>
     <input type="radio" value="allRequests" name="requests" {{"checked" if requestType=="allRequests"}} /> All Requests
     <input type="radio" value="myRequests" name="requests" {{"checked" if requestType=="myRequests"}} /> My Requests
     <input type="radio" value="myClaimedRequests" name="requests" {{"checked" if requestType=="myClaimedRequests"}} />
@@ -22,9 +26,13 @@
     Claimed Requests
     <input type="submit" value="Filter" />
   </form>
+  </div>
 
+<br/>
   {% if requestType=="allRequests" %}
+  <div class="requestField">
   <form name="request" action="/dashboard" method="POST" novalidate class="form">
+    <legend> Enter your address to find requests near you! </legend>
     <fieldset>
       {{ addressForm.hidden_tag() }}
       <span>
@@ -38,6 +46,7 @@
 
     </fieldset>
   </form>
+  </div>
   {% endif %}
 
   <div class="card-container w-100">
@@ -54,23 +63,27 @@
           <p class="card-text address">{{request["address"]}}</p>
           <p class="card-text miles">{{request["distance"]}} miles away</p>
           <p class="card-text description">{{request["description"]}}</p>
+          </div>
+          <div class="card-footer text-muted">
+
           {% if request["finished"] %}
           <p style="color: green">Completed!</p>
           {% elif session.get("user").get("id") == request["volunteer"] %}
           <p style="color: red">Claimed by you!</p>
-
           {% elif session.get("user").get("id") == request["user"] %}
-          <form method="POST" action="/complete">
+          <form method="POST" action="/complete" class="text-center">
             <input hidden value=`{{request["_id"]}}` name="requestID" id="requestID" />
             <input type="submit" value="Mark as complete" />
           </form>
           {% else %}
-          <form method="POST" action="/claim">
+
+          <form method="POST" action="/claim" class="text-center">
             <input hidden value=`{{request["_id"]}}` name="requestID" id="requestID" />
             <input type="submit" value="Claim" />
           </form>
           {% endif %}
         </div>
+
       </div>
       {% endfor %}
     </div>
