@@ -1,29 +1,20 @@
 <header>
-  <nav>
-    <ul class="nav">
+  <nav class="navbar navbar-light">
+    <ul class=" nav">
       <li class="nav-item">
-        <a
-          href="{{ url_for('home') }}"
-          class="nav-link {% if index %}active{% endif %}"
-          >Home</a
-        >
+        <img src="https://i.imgur.com/H2ChDv8.png" width=50 height=50 />
+      </li>
+      </li>
+      <a href="{{ url_for('home') }}" class="nav-link {% if index %}active{% endif %}">Home</a>
       </li>
 
       {% if not session["user"] %}
       <li class="nav-item">
-        <a
-          href="{{ url_for('signup') }}"
-          class="nav-link {% if register %}active{% endif %}"
-          >Register</a
-        >
+        <a href="{{ url_for('signup') }}" class="nav-link {% if register %}active{% endif %}">Signup</a>
       </li>
 
       <li class="nav-item">
-        <a
-          href="{{ url_for('login') }}"
-          class="nav-link {% if login %}active{% endif %}"
-          >Login</a
-        >
+        <a href="{{ url_for('login') }}" class="nav-link {% if login %}active{% endif %}">Login</a>
       </li>
       {% else %}
       <li class="nav-item">

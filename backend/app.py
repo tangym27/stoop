@@ -1,6 +1,8 @@
 import datetime
 import pymongo
 import urllib.parse
+import requests as rq
+from geopy import distance
 from pymongo import MongoClient
 from flask import Flask, render_template, flash, request, session, redirect, url_for, jsonify
 from datetime import datetime
@@ -13,7 +15,8 @@ app = Flask(__name__)
 # must run python3 -m pip install 'pymongo[srv]'
 # documentation: https://pymongo.readthedocs.io/en/stable/tutorial.html
 app.config['SECRET_KEY'] = "KIUYGY(H't76$A%U$6"
-googleAPIKey = "AIzaSyBbRW0nz9TJyiBTA-DrZbve8nc9m0viXBU"
+# googleAPIKey = "AIzaSyBbRW0nz9TJyiBTA-DrZbve8nc9m0viXBU"
+googleAPIKey = "AIzaSyC3MU7FGVapAnAKEsN48cu4sLG2ITQd33E"
 client = MongoClient(
     "mongodb+srv://admin:ibqamgEqZgrWoEJP@cluster0.j7aiy.mongodb.net/stoop?retryWrites=true&w=majority")
 global db
@@ -29,20 +32,19 @@ from wtforms.widgets import PasswordInput
 
 
 class LoginForm(FlaskForm):
-    email = StringField("Email", validators=[DataRequired(), Email()])
+    email = StringField("Email", validators=[DataRequired(), Email()], render_kw={"placeholder": "Email Address"})
     password = StringField("Password", validators=[
-                           DataRequired()], widget=PasswordInput(hide_value=False))
+                DataRequired()], widget=PasswordInput(hide_value=False), render_kw={"placeholder": "Password"})
     submit = SubmitField("Login")
-
-
+    
 class SignupForm(FlaskForm):
-    email = StringField("Email", validators=[DataRequired(), Email()])
+    email = StringField("Email Address", validators=[DataRequired(), Email()], render_kw={"placeholder": "Email Address"})
     password = StringField("Password", validators=[DataRequired(), Length(
-        min=6)], widget=PasswordInput(hide_value=False))
+        min=6)], widget=PasswordInput(hide_value=False), render_kw={"placeholder": "Password"})
     passwordConfirm = StringField("Confirm Password", validators=[DataRequired(
-    ), Length(min=6), EqualTo("password")], widget=PasswordInput(hide_value=False))
-    firstName = StringField("First Name", validators=[DataRequired()])
-    lastName = StringField("Last Name", validators=[DataRequired()])
+    ), Length(min=6), EqualTo("password")], widget=PasswordInput(hide_value=False), render_kw={"placeholder": "Confirm Password"})
+    firstName = StringField("First Name", validators=[DataRequired()], render_kw={"placeholder": "First Name"})
+    lastName = StringField("Last Name", validators=[DataRequired()], render_kw={"placeholder": "Last Name"})
     submit = SubmitField("Register")
 
     # automatically validates on the `email` field because it's called `validate_email`
@@ -60,35 +62,69 @@ class RequestForm(FlaskForm):
     submit = SubmitField("Request")
 
     # def validate_address(self, address):
-    #     if category == "delivery" and not address:
+    #     if not address:
     #         raise ValidationError("Address is required for delivery")
+    #     try: 
+    #         rq.get('https://maps.googleapis.com/maps/api/geocode/json?address=' + address + '&key=' + googleAPIKey).content
+    #         return True
+    #     except:
+    #         raise ValidationError("Address invalid")
+
+class AddressForm(FlaskForm):
+    address = StringField("Address", validators=[DataRequired()], render_kw={"placeholder": "Address"})
+    submit = SubmitField("Find Requests")
+
 
 @app.route("/")
 def home():
     return redirect(url_for("dashboard"))
 
 # see recent orders
-@app.route('/dashboard')
+@app.route('/dashboard', methods=['POST', 'GET'])
 def dashboard():
     if not session.get("user"):
         return redirect(url_for("login"))
     
+    requestType = request.args.get("requests")
+    requestType = requestType if requestType else "allRequests"
     # myRequests
     # myClaimedRequests
     # all
-    myRequests = []
-    myClaimedRequests = []
     allRequests = []
+    toSort = []
+    idx = 0
+    addressForm = AddressForm()
+    volunteerLocation = None
+    volunteercoords = None
     
-    for request in requests.find({}).sort("dateRequested",pymongo.DESCENDING):
-        _id = str(request.get("_id"))
-        user = str(request.get("user"))
-        task = request.get("task")
-        category = request.get("category")
-        description = request.get("description")
-        dateRequested = request.get("dateRequested")
-        finished = request.get("finished")
-        volunteer = request.get("volunteer")
+    if addressForm.validate_on_submit():
+        try:
+            address = request.form.get("address")
+            volunteerLocation = rq.get('https://maps.googleapis.com/maps/api/geocode/json?address=' + address + '&key=' + googleAPIKey).content
+            volunteercoords = json.loads(volunteerLocation)["results"][0]["geometry"]["location"]
+            volunteercoords = (volunteercoords["lat"], volunteercoords["lng"])
+        except:
+            flash(address + " is an invalid address", "danger")
+            return render_template("dashboard.html", addressForm = addressForm, requests={"requests": allRequests}, requestType=requestType)
+    
+    for req in requests.find({}).sort("dateRequested",pymongo.DESCENDING):
+        _id = str(req.get("_id"))
+        user = str(req.get("user"))
+        task = req.get("task")
+        category = req.get("category")
+        description = req.get("description")
+        dateRequested = req.get("dateRequested")
+        finished = req.get("finished")
+        volunteer = req.get("volunteer")
+        address = req.get("address")
+
+        # calculate distance using google maps api
+        location = rq.get('https://maps.googleapis.com/maps/api/geocode/json?address=' + str(address) + '&key=' + googleAPIKey).content
+
+        coords = json.loads(location)["results"][0]["geometry"]["location"]
+        coords = (coords["lat"], coords["lng"])
+
+        # user_location = session.get('location')
 
         requestObj = {
                 "_id": _id,
@@ -98,20 +134,32 @@ def dashboard():
                 "dateRequested": str(dateRequested).split(" ")[0],
                 "finished": finished,
                 "volunteer": volunteer,
-                "user": user
-            }
+                "user": user,
+                "address": address,
+                "distance": "N/A" if not volunteercoords else round(distance.distance(coords, volunteercoords).miles, 4)
+        }
 
-        if user == session.get("user").get("id"):
-            myRequests.append(requestObj)
-        elif volunteer == session.get("user").get("id"):
-            myClaimedRequests.append(requestObj)
-        # elif not volunteer or volunteer == session.get("user").get("id") or user == session.get("user").get("id"):
-        if not volunteer:
+        if requestType=="myRequests" and user == session.get("user").get("id"):
             allRequests.append(requestObj)
 
-    return render_template("dashboard.html", requests={"requests": allRequests}, myRequests={"requests": myRequests}, myClaimedRequests=myClaimedRequests)
+        elif requestType=="myClaimedRequests" and volunteer == session.get("user").get("id"):
+            allRequests.append(requestObj)
 
-import bson 
+        elif requestType=="allRequests" and (not volunteer or user == session.get("user").get("id") or volunteer == session.get("user").get("id")):
+            if volunteerLocation:
+                if distance.distance(coords, volunteercoords).miles < 10:
+                    allRequests.append(requestObj)
+                    toSort.append((distance.distance(coords, volunteercoords), idx))
+                    idx += 1
+    sortedReqs = sorted(toSort)
+    sortedAllRequests = []
+    for sortedReq in sortedReqs:
+        sortedAllRequests.append(allRequests[sortedReq[1]])
+
+    if len(sortedAllRequests) == 0:
+        sortedAllRequests = allRequests
+    return render_template("dashboard.html", addressForm = addressForm, requests={"requests": sortedAllRequests}, requestType=requestType)
+
 @app.route("/claim", methods=["POST"])
 def claim():
     if not session.get("user"):
@@ -149,19 +197,28 @@ def requestOne():
         task = request.form.get("task")
         category = request.form.get("category")
         description = request.form.get("description")
+        address = request.form.get("address")
 
-        request_dicts= {
-            "task": task,
-            "user": session.get("user").get("id"),
-            "volunteer": None,
-            "category": category,
-            "description": description,
-            "dateRequested": datetime.now(),
-            "finished": False,
-        }
+        try:
+            location = rq.get('https://maps.googleapis.com/maps/api/geocode/json?address=' + str(address) + '&key=' + googleAPIKey).content
+            location = json.loads(location)["results"][0]["geometry"]["location"]
+            request_dicts= {
+                "task": task,
+                "user": session.get("user").get("id"),
+                "volunteer": None,
+                "category": category,
+                "description": description,
+                "dateRequested": datetime.now(),
+                "finished": False,
+                "address": address,
+            }
 
-        requests.insert_one(request_dicts)
-        return redirect(url_for("dashboard"))
+            requests.insert_one(request_dicts)
+            return redirect(url_for("dashboard"))
+        except:
+            flash(address + " is an invalid address.", "danger")
+            return render_template("request.html", requestForm = requestForm)
+        
     return render_template("request.html", requestForm = requestForm)
 
 @app.route('/signup', methods=['POST', 'GET'])
@@ -183,7 +240,7 @@ def signup():
 
         new_user = {"email": email, "password": password,
                     "first_name": first_name, "last_name": last_name}
-        new_user_id = str(users.insert_one(new_user))
+        users.insert_one(new_user)
         return redirect(url_for("login"))
         # session["user"] = {"email": email, "first_name": first_name, "last_name": last_name, "id": new_user_id}
         flash("You have successfully signed up", "success")
@@ -209,6 +266,8 @@ def login():
             
             flash("You have successfully logged in", "success")
             return redirect(url_for("dashboard"))
+        else:
+            flash("Wrong email / password", "danger")
     
     return render_template("login.html", loginForm=loginForm)
 
@@ -218,8 +277,5 @@ def logout():
     return redirect(url_for("home"))
 
 if __name__ == "__main__":
-    # print(users.find_one({"id": 0}))
-    # print(volunteers.find_one({"id": 0}))
-    # print(requests.find_one({"id": 0}))
     app.debug = True
     app.run()

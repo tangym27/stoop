@@ -1,5 +1,5 @@
 {% extends "layout.html" %} {% block content %}
-<button type="button" onclick=`{% set display="allRequests" %}`>
+<!-- <button type="button" onclick=`{% set display="allRequests" %}`>
   All Requests
 </button>
 <button type="button" onclick=`{% set display="myRequests" %}`>
@@ -7,39 +7,73 @@
 </button>
 <button type="button" onclick=`{% set display="claimedRequests" %}`>
   My Claimed Requests
-</button>
+</button> -->
+
 <!-- <button type="button" onclick="">My Requests</button>
 <button type="button" onclick="">My Claimed Requests</button> -->
-{% set display = 'allRequests' %}
+<!-- {% set display = 'allRequests' %} -->
+<div class="dashboard">
+  <p></p>
+  <form action="/dashboard">
+    <input type="radio" value="allRequests" name="requests" {{"checked" if requestType=="allRequests"}} /> All Requests
+    <input type="radio" value="myRequests" name="requests" {{"checked" if requestType=="myRequests"}} /> My Requests
+    <input type="radio" value="myClaimedRequests" name="requests" {{"checked" if requestType=="myClaimedRequests"}} />
+    My
+    Claimed Requests
+    <input type="submit" value="Filter" />
+  </form>
 
-<div class="card-container w-100">
-  <div class="d-flex">
-    {% for request in requests["requests"] %}
-    <div class="card">
-      <div class="card-body">
-        <p class="card-text">{{request["category"]}}</p>
-        <p class="card-text">Date Requested: {{request["dateRequested"]}}</p>
-        <h5 class="card-title">{{request["task"]}}</h5>
-        <p class="card-text">{{request["description"]}}</p>
-        {% if session.get("user").get("id") == request["volunteer"] %}
-        <p>Claimed by you!</p>
+  {% if requestType=="allRequests" %}
+  <form name="request" action="/dashboard" method="POST" novalidate class="form">
+    <fieldset>
+      {{ addressForm.hidden_tag() }}
+      <span>
+        {{ addressForm.address() }}
+        {{ addressForm.submit() }}
 
-        {% elif session.get("user").get("id") == request["user"] %}
-        <form method="POST" action="/complete">
-          <input hidden value=`{{request["_id"]}}` name="requestID"
-          id="requestID" />
-          <input type="submit" value="Mark as complete" />
-        </form>
-        {% else %}
-        <form method="POST" action="/claim">
-          <input hidden value=`{{request["_id"]}}` name="requestID"
-          id="requestID" />
-          <input type="submit" value="Claim" />
-        </form>
-        {% endif %}
+        {% for error in addressForm.address.errors %}
+        <span class="errorMessage">{{ error }}</span>
+        {% endfor %}
+      </span>
+
+    </fieldset>
+  </form>
+  {% endif %}
+
+  <div class="card-container w-100">
+    <div class="d-flex">
+      {% for request in requests["requests"] %}
+      <!-- {# {% if (display == "allRequests") or (display == "myRequests" and session.get("user").get("id") == request["user"]) or (display == "claimedRequests" and session.get("user").get("id") == request["user"]) %} #}-->
+      <div class="card">
+        <div class="card-body">
+          <p class="card-text category">{{request["category"]}}</p>
+          <p class="card-text date">{{request["dateRequested"]}}</p>
+
+          <h5 class="card-title">{{request["task"]}}</h5>
+
+          <p class="card-text address">{{request["address"]}}</p>
+          <p class="card-text miles">{{request["distance"]}} miles away</p>
+          <p class="card-text description">{{request["description"]}}</p>
+          {% if request["finished"] %}
+          <p style="color: green">Completed!</p>
+          {% elif session.get("user").get("id") == request["volunteer"] %}
+          <p style="color: red">Claimed by you!</p>
+
+          {% elif session.get("user").get("id") == request["user"] %}
+          <form method="POST" action="/complete">
+            <input hidden value=`{{request["_id"]}}` name="requestID" id="requestID" />
+            <input type="submit" value="Mark as complete" />
+          </form>
+          {% else %}
+          <form method="POST" action="/claim">
+            <input hidden value=`{{request["_id"]}}` name="requestID" id="requestID" />
+            <input type="submit" value="Claim" />
+          </form>
+          {% endif %}
+        </div>
       </div>
+      {% endfor %}
     </div>
-    {% endfor %}
   </div>
 </div>
 {% endblock %}

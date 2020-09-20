@@ -1,5 +1,84 @@
-body {
-  background: url(./background.jpg);
-  background-color: lightblue;
-  height: 100vh;
+@import url("https://fonts.googleapis.com/css?family=Montserrat&display=swap");
+
+:root {
+  --background: #f1e0d6;
+  --body: #2e282a;
+  --navbar: #e4c3b0;
+  --darkbrown: #2E282A;
+  --lightbrown: #aa6339;
 }
+
+body {
+  background-color: var(--background);
+  height: 100vh;
+  /* color: var(--lightbrown); */
+}
+
+.container {
+  color: var(--lightbrown);
+}
+
+a {
+  color: var(--darkbrown);
+}
+
+
+.navbar {
+  background-color: var(--navbar);
+}
+
+.registerBackground{
+  background-color: #ebd2c4;
+}
+
+.errorMessage {
+  color: red;
+}
+
+input {
+  display: inline-block;
+  padding: 4px 8px;
+  border: 1px solid var(--darkbrown);
+  border-radius: 5px;
+}
+
+
+.dashboard {
+  padding: 25px;
+}
+
+.card-container {
+  /* padding: 0 5px; */
+  margin-top: 2em;
+  text-align: center;
+}
+
+.card {
+  width: max(33%, 300px) !important;
+  /* width: 300px; */
+  text-align: left;
+  white-space: pre-wrap;
+  /* display: flex;
+  flex-direction: row; */
+  /* justify-content: center; */
+  margin: 0 10px;
+  /* @media screen and (max-width: 768px) {
+    flex-direction: column;
+    align-items: center;
+  } */
+}
+
+.card-text {
+  margin: -20px 0;
+  padding: 0;
+}
+
+.card-title{
+  margin: -30px 0;
+}
+
+.category, .date, .miles{
+  color: #808080;
+  font-size: 13px;
+}
+

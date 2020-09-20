@@ -6,21 +6,22 @@
     {{ requestForm.hidden_tag() }}
     <p>
       {{ requestForm.category.label }}<br />
+
+      {% for subfield in requestForm.category %}
+      <tr>
+        <td>{{ subfield }}</td>
+        <td>{{ subfield.label }}</td>
+      </tr>
+      {% endfor %}
       {% for error in requestForm.category.errors %}
       <span class="errorMessage">{{ error }}</span>
       {% endfor %}
-      {% for subfield in requestForm.category %}
-        <tr>
-            <td>{{ subfield }}</td>
-            <td>{{ subfield.label }}</td>
-        </tr>
-        {% endfor %}
     </p>
     <p>
-        {{ requestForm.task.label }}<br />
-        {{ requestForm.task() }} {% for error in requestForm.task.errors %}
-        <span class="errorMessage">{{ error }}</span>
-        {% endfor %}
+      {{ requestForm.task.label }}<br />
+      {{ requestForm.task() }} {% for error in requestForm.task.errors %}
+      <span class="errorMessage">{{ error }}</span>
+      {% endfor %}
     </p>
     <p>
       {{ requestForm.address.label }}<br />
@@ -29,10 +30,10 @@
       {% endfor %}
     </p>
     <p>
-        {{ requestForm.description.label }}<br />
-        {{ requestForm.description() }} {% for error in requestForm.description.errors %}
-        <span class="errorMessage">{{ error }}</span>
-        {% endfor %}
+      {{ requestForm.description.label }}<br />
+      {{ requestForm.description() }} {% for error in requestForm.description.errors %}
+      <span class="errorMessage">{{ error }}</span>
+      {% endfor %}
     </p>
 
     <p>{{ requestForm.submit() }}</p>
